@@ -51,6 +51,8 @@ public extension Mapping {
         .init("q", mod: nil, action: ":quitApplication<CR>"),
         .init("e", mod: nil, action: ":repeatMode<CR>"),
         .init("h", mod: nil, action: ":shuffleMode<CR>"),
+        .init("j", mod: nil, action: ":scrollQueueDown<CR>"),
+        .init("k", mod: nil, action: ":scrollQueueUp<CR>"),
         .init("ESC", mod: nil, action: ":close<CR>"),
     ]
 }

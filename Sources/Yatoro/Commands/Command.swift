@@ -40,6 +40,8 @@ public struct Command: Sendable {
         .init(name: "open", short: "o", action: .open),
         .init(name: "close", short: "c", action: .close),
         .init(name: "closeAll", short: "ca", action: .closeAll),
+        .init(name: "scrollQueueDown", short: "sqd", action: .scrollQueueDown),
+        .init(name: "scrollQueueUp", short: "squ", action: .scrollQueueUp),
         .init(name: "help", short: "h", action: nil), // Help command, handled specially
     ]
 
@@ -127,6 +129,12 @@ public struct Command: Sendable {
         case .closeAll:
             SearchManager.shared.lastSearchResult = nil
 
+        case .scrollQueueDown:
+            QueuePage.pendingScrollDown = true
+
+        case .scrollQueueUp:
+            QueuePage.pendingScrollUp = true
+
         }
         return
     }
@@ -155,4 +163,6 @@ public enum CommandAction: String, Sendable, Codable {
     case open
     case close
     case closeAll
+    case scrollQueueDown
+    case scrollQueueUp
 }
