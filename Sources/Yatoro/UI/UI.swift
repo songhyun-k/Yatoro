@@ -133,6 +133,7 @@ public class UI {
     }
 
     public func stop() async {
+        QueueStatePersistence.saveState()
         await pageManager.onQuit()
         logger?.info("Stopping Yatoro...")
 
