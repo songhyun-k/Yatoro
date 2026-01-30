@@ -17,6 +17,10 @@ public class QueuePage: Page {
     private var currentQueue: ApplicationMusicPlayer.Queue.Entries?
     private var cache: [Page]
 
+    private var scrollOffset: Int = 0
+    public static var pendingScrollDown: Bool = false
+    public static var pendingScrollUp: Bool = false
+
     private var maxItemsDisplayed: Int {
         (Int(self.state.height) - 7) / 5
     }
@@ -49,6 +53,7 @@ public class QueuePage: Page {
         )
 
         self.currentQueue = nil
+        self.scrollOffset = 0
     }
 
     public func getPageState() async -> PageState { self.state }
@@ -168,6 +173,19 @@ public class QueuePage: Page {
 
     public func render() async {
 
+        if QueuePage.pendingScrollDown {
+            QueuePage.pendingScrollDown = false
+            scrollOffset += 1
+            currentQueue = nil
+        }
+        if QueuePage.pendingScrollUp {
+            QueuePage.pendingScrollUp = false
+            if scrollOffset > 0 {
+                scrollOffset -= 1
+                currentQueue = nil
+            }
+        }
+
         switch Player.shared.player.state.repeatMode {
         case Optional.none, .some(.none):
             repeatPlane.width = 10
@@ -202,10 +220,20 @@ public class QueuePage: Page {
         }
         cache = []
         currentQueue = Player.shared.queue
+        // Clamp scrollOffset to valid range
+        let totalItems = currentQueue?.count ?? 0
+        let maxOffset = max(0, totalItems - maxItemsDisplayed - 1)
+        scrollOffset = min(scrollOffset, maxOffset)
+        scrollOffset = max(scrollOffset, 0)
         var i = 0
+        var skipped = 0
         for itemIndex in currentQueue!.indices {
             switch currentQueue![itemIndex].item {
             case .song(let song):
+                if skipped < scrollOffset {
+                    skipped += 1
+                    continue
+                }
                 guard
                     let page = SongItemPage(
                         in: self.borderPlane,
@@ -225,7 +253,7 @@ public class QueuePage: Page {
                 self.cache.append(page)
             default: break
             }
-            if itemIndex >= maxItemsDisplayed {
+            if i > maxItemsDisplayed {
                 break
             }
         }
